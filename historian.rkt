@@ -1,42 +1,26 @@
-#lang racket
-
-(require [prefix-in tui: charterm])
+#lang racket/base
 
 (define [main]
-  (tui:with-charterm
-    (tui:charterm-clear-screen)
-    (tui:charterm-cursor 1 1)
-    (tui:charterm-display "DEBUG Press a key...")
-    (let [(key (tui:charterm-read-key))]
-      (handle-key key))))
+  (define args (current-command-line-arguments))
+  (define args-len (vector-length args))
 
-(define [handle-key key]
-  (match key
-    [#f (display "ERROR - input timed out")]
-    [(? char? c) (display-key c)]
-    [(? symbol? s) (display-symbol s)]))
+  (unless [args-len-valid? args-len]
+    [begin
+      (printf "Invalid number of arguments\n\n")
+      (display-help-options)
+      (exit 1)])
 
-(define [display-symbol key]
-  (define [symbol-to-string]
-    (match key
-      ['return "enter"]
-      ['up "up"]
-      ['down "down"]
-      ['left "left"]
-      ['right "right"]
-      [_ "ERROR - No matching key symbol found"]))
-  (tui:charterm-clear-screen)
-  (tui:charterm-cursor 1 1)
-  (tui:charterm-display (format"DEBUG symbol received ~s" [symbol-to-string])))
+  ; (displayln [ve-ref args 0])
+  (displayln "DEBUG - good so far"))
 
-(define [display-key key]
-  (tui:charterm-clear-screen)
-  (tui:charterm-cursor 1 1)
-  (printf "DEBUG char received ~s" [string key]))
+(define [args-len-valid? len]
+    (= len 1))
 
-(define [display-bold s]
-  (tui:charterm-bold)
-  (tui:charterm-display s)
-  (tui:charterm-normal))
+(define [display-help-options]
+  (displayln "\033[1mhistorian\033[22m does not take CLI args other than mode (defined blow).")
+  (displayln "Once mode is selected, further inputs can be made\n")
+  (displayln "-a  Add new entry")
+  (displayln "-s  Search entries using keyword")
+  (displayln "-c  Copy entry using ID"))
 
 (main)
